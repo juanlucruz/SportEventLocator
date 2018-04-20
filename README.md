@@ -27,3 +27,6 @@ https://pandas.pydata.org/ - data analysis
 spark?
 
 scikit?
+
+owslib (pip3 install owslib)
+
