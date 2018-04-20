@@ -29,4 +29,4 @@ spark?
 scikit?
 
 owslib (pip3 install owslib)
-
+opencv (pip3 install opencv-python)
