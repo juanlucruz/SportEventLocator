@@ -2,7 +2,7 @@ from owslib.wms import WebMapService
 from owslib import crs
 from PIL import Image, ImageEnhance, ImageFilter
 import cv2
-import numpy as np
+import numpy as nps
 
 
 c = crs.Crs('EPSG:3857')
@@ -30,9 +30,9 @@ print('GetMap formats:',wms.getOperationByName('GetMap').formatOptions)
 #box = 0.01
 """
 
-x=234314 #m?
+box = 2000 # m?
+x=234314#m?
 y=5067580 #m?
-box = 1000 # m?
 
 picsize = 512 
 #possible (boxsize/picsize) configurations to detect fields: 1000/512, 2000/512 , 1000 /256
@@ -49,7 +49,7 @@ img = wms.getmap(
 with open('example_image_mosaic.png','wb') as out:
 	out.write(img.read())
 
-
+"""
 def green_detection():
 	img = cv2.imread('example_image_mosaic.png')
 	# Green fields detection
@@ -107,3 +107,4 @@ def contour_detection():
 if __name__ == "__main__":
 	green_detection()
 	contour_detection()
+"""
