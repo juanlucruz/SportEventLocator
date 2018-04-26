@@ -27,4 +27,4 @@ for status in python_tweets.search(**query)['statuses']:
 
 df = pd.DataFrame(dict_)
 df.sort_values(by='favorite_count', inplace=True, ascending=False)
-print(df.values[:10])
+print(df)
