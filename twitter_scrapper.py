@@ -16,8 +16,7 @@ def process_tweet(tweet):
             'place', 'quoted_status_id', 'is_quote_status', 'quoted_status',
             'retweeted_status', 'quote_count', 'reply_count', 'retweet_count',
             'favorite_count', 'favorited', 'retweeted', 'possibly_sensitive',
-            'filter_level', 'lang', 'matching_rules'
-            ]:
+            'filter_level', 'lang', 'matching_rules']:
             d[key] = tweet[key]
     except KeyError as e:
         pass
