@@ -31,9 +31,10 @@ print('GetMap formats:',wms.getOperationByName('GetMap').formatOptions)
 """
 
 box = 1000 # m?
-x=234314#m?
-y=5067580 #m?
-
+# x=234314#m?
+x = 241314
+# y=5067580 #m?
+y = 5070580
 picsize = 512 
 #possible (boxsize/picsize) configurations to detect fields: 1000/512, 2000/512 , 1000 /256
 
