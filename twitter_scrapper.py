@@ -1,8 +1,9 @@
 # Import the Twython class
 from twython import Twython, TwythonStreamer
 import json
-import pandas as pd
+# import pandas as pd
 import csv
+import datetime
 
 
 def process_tweet(tweet):
@@ -10,14 +11,27 @@ def process_tweet(tweet):
     d = {}
     d['hashtags'] = [hashtag['text'] for hashtag in tweet['entities']['hashtags']]
     try:
-        for key in [
-            'created_at', 'id', 'text', 'truncated', 'in_reply_to_status_id',
-            'in_reply_to_user_id', 'in_reply_to_screen_name', 'coordinates',
+        for key in {
+		    'created_at', 'id', 'text', 'source', 'truncated', 
+            'in_reply_to_status_id', 'in_reply_to_user_id',
+            'in_reply_to_screen_name', 'user', 'coordinates',
             'place', 'quoted_status_id', 'is_quote_status', 'quoted_status',
             'retweeted_status', 'quote_count', 'reply_count', 'retweet_count',
-            'favorite_count', 'favorited', 'retweeted', 'possibly_sensitive',
-            'filter_level', 'lang', 'matching_rules']:
-            d[key] = tweet[key]
+            'favorite_count', 'favorited', 'retweeted', 'entities', 'extended_entities',
+            'possibly_sensitive', 'filter_level', 'lang', 'matching_rules'}:
+            if key == 'user':
+                    pass
+            elif key == 'place':
+                    pass
+            elif key == 'quoted_status' or key == 'retweeted_status':
+                    pass
+            elif key == 'entities':
+                    pass
+            elif key == 'extended_entities':
+                    pass
+            else:
+                    d[key] = tweet[key]
+
     except KeyError as e:
         pass
     # d['text'] = tweet['text']
@@ -35,9 +49,10 @@ class MyStreamer(TwythonStreamer):
 
         # # Only collect tweets in English
         # if data['lang'] == 'en':
-        tweet_data = process_tweet(data)
-        print(len(data.keys()))
-        self.save_to_csv(tweet_data)
+        # tweet_data = process_tweet(data)
+        print(datetime.datetime.now())
+        # self.save_to_csv(tweet_data)
+        self.save_to_json(data)
 
     # Problem with the API
     def on_error(self, status_code, data):
@@ -50,6 +65,9 @@ class MyStreamer(TwythonStreamer):
         with open(r'saved_tweets_big.csv', 'a') as out_file:
             writer = csv.writer(out_file)
             writer.writerow(list(tweet.values()))
+    def save_to_json(self, tweet):
+        with open('saved_tweets_big.json', 'a') as out_file:
+            json.dump(tweet, out_file)
 
 def main():
 
