@@ -32,20 +32,27 @@ def getmap():
     y=5066180 #m?
     picsize = 512
     xylist=[]
+    d=[]
+    xydict={}
     location_list=[]
-    for i in range(-5,5):
-        for j in range(-5,5):
+    for i in range(-10,10):
+        for j in range(-10,10):
             xylist.append([x+(i*(box-100)),y+(j*(box-100))])
     
     xylist = sc.parallelize(xylist)\
         .map(lambda x: [x,parallel_processing(x,box,picsize)])\
         .collect()
     sc.stop()
+    
+    # remove localization exact duplicates
+    [d.append(item) for item in xylist if item not in d]
 
-    return xylist
+    for element in d:
+        if (element[1] != []):
+            xydict[str(element[0][0])+str(element[0][1])]=element[1]
+    return xydict
 
 if __name__ == "__main__":
-    xylist=getmap()
-
-    for element in xylist:
+    xydict=getmap()
+    for element in xydict.items():
         print(element)

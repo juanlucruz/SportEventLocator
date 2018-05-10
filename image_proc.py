@@ -1,7 +1,7 @@
 from PIL import Image, ImageEnhance, ImageFilter
 import cv2
 import numpy as np
-from pyproj import Proj
+from pyproj import Proj, transform
 
 def green_detection(xy):
     img = cv2.imread('Images/image{0}{1}.png'.format(xy[0],xy[1]))
@@ -44,7 +44,7 @@ def contour_detection(xy):
         epsilon = 0.1*cv2.arcLength(contours[k],True)
         contours[k] = cv2.approxPolyDP(contours[k],epsilon,True)
         area = cv2.contourArea(contours[k])
-        if thresholdarea + 250 > area > thresholdarea - 250:
+        if (thresholdarea + 250 > area > thresholdarea - 250) and len(contours[k])==4:
             filteredContours.append(contours[k])
         k+=1
 
@@ -55,6 +55,7 @@ def contour_detection(xy):
 
 def location_convertor(contours,xy,box,picsize):
     p1 = Proj(init='epsg:3857')
+    p2 = Proj(init='epsg:4326')
     c=[]
     xm=xy[0]
     ym=xy[1]
@@ -78,6 +79,20 @@ def location_convertor(contours,xy,box,picsize):
         # Meter to lon,lat conversion
 
         lon, lat = p1(x,y,inverse=True)
-        c+=[[lon,lat]]
+
+        # Remove duplicates
+        xl=100
+        yl=0
+        xl, yl = transform(p1, p2,  lon, lat)
+
+        if len(c) > 0:
+            for element in c:
+                if (element[0]+xl > lon > element[0]-xl) or (element[1]+yl > lat > element[1]-yl):
+                    pass 
+                else:
+                    c+=[[lon,lat]]              
+        else:
+            c+=[[lon,lat]]          
     
     return c
+    
