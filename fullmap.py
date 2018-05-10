@@ -29,20 +29,20 @@ with open('fullmap.png','wb') as out:
 img1 = cv2.imread('fullmap.png')
 cv2.imwrite('circle.png',img1)
 
-xydict=getmap()
+xydict = getmap()
 
 img1 = cv2.imread('circle.png')
 for element in xydict.values():
     for value in element:
-        lon=value[0]
-        lat=value[1]
+        lon = value[0]
+        lat = value[1]
         try:
             proj = Proj(init='epsg:3857')
-            xm,ym = proj(lon,lat)
-            p1= picsize/(2*box)*(xm-(x-box)) 
-            p2= picsize/(2*box)*((y+box)-ym) 
-            cv2.circle(img1,(int(p1),int(p2)), 5, (0,0,255), -1) 
+            xm, ym = proj(lon, lat)
+            p1 = picsize / (2 * box) * (xm - (x - box))
+            p2 = picsize / (2 * box) * ((y + box) - ym)
+            cv2.circle(img1, (int(p1), int(p2)), 5, (0, 0, 255), -1)
         except Exception as e:
             print(e)
 
-cv2.imwrite('circle.png',img1) 
+cv2.imwrite('circle.png', img1)
