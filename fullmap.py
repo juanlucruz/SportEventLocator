@@ -3,6 +3,7 @@ from owslib import crs
 from pyproj import Proj, transform
 from location_finder import getmap
 import cv2
+import csv
 
 c = crs.Crs('EPSG:3857')
 #wms = WebMapService('http://www.ign.es/wms-inspire/pnoa-ma', version='1.3.0')
@@ -27,11 +28,8 @@ with open('fullmap.png','wb') as out:
     out.write(img.read())
 """
 img1 = cv2.imread('fullmap.png')
-cv2.imwrite('circle.png',img1)
 
 xydict = getmap()
-
-img1 = cv2.imread('circle.png')
 for element in xydict.values():
     for value in element:
         lon = value[0]
