@@ -53,21 +53,24 @@ def main():
             try:
                 json_parsed.append(json.loads(unzip))
             except json.decoder.JSONDecodeError as e:
-                print('Error decoding {}'.format(unzip))
+                # print('Error decoding {}'.format(unzip))
+                print('Error decoding')
         elif el[0] != '{' and el[-1] == '}':
             # print('{' + el )
             unzip = '{' + el
             try:
                 json_parsed.append(json.loads(unzip))
             except json.decoder.JSONDecodeError as e:
-                print('Error decoding {}'.format(unzip))
+                # print('Error decoding {}'.format(unzip))
+                print('Error decoding')
         elif el[0] == '{' and el[-1] != '}':
             # print(el + '}')
             unzip = el + '}'
             try:
                 json_parsed.append(json.loads(unzip))
             except json.decoder.JSONDecodeError as e:
-                print('Error decoding {}'.format(unzip))
+                # print('Error decoding {}'.format(unzip))
+                print('Error decoding')
         # a = json.load(fp)
         # for chunk in read_in_chunks(fp, 1024):
         #     # print(chunk)
@@ -112,7 +115,13 @@ def main():
         #     chunk_count += 1
             #  END READING FOR
     print(len(json_parsed))
-    print(json.dumps(json_parsed[0],indent=2))
+    # print(json.dumps(json_parsed[1],indent=2))
+    # print(json_parsed[1]['place']['full_name'])
+    for i in range(100):
+        if 'extended_tweet' in json_parsed[i].keys():
+            print(json_parsed[i]['extended_tweet']['full_text'].lower().split())
+        else:
+            print(json_parsed[i]['text'].lower().split())
     # print(a)
 
 if __name__ == "__main__":
