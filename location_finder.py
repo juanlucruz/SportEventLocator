@@ -57,7 +57,5 @@ def getmap():
 
 if __name__ == "__main__":
     xydict = getmap()
-    with open(r'saved_tweets_big.csv', 'w') as out_file:
-        writer = csv.writer(out_file)
-        for element in xydict.items():
-            writer.writerow(element)
+    for element in xydict.items():
+        print(element)
