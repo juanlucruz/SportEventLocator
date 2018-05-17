@@ -35,8 +35,8 @@ def getmap():
     d=[]
     xydict={}
     location_list=[]
-    for i in range(-10,10):
-        for j in range(-10,10):
+    for i in range(-12,12):
+        for j in range(-12,12):
             xylist.append([x+(i*(box-100)),y+(j*(box-100))])
     
     xylist = sc.parallelize(xylist)\

@@ -9,7 +9,7 @@ def green_detection(xy):
     hsv= cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     #Threshold for detecting green
-    lower = np.array([15, 58, 15])
+    lower = np.array([15, 38, 15])
     upper = np.array([100,240,100])
     
     # Apply mask
