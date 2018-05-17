@@ -22,26 +22,30 @@ def distance_calculator(lat1,lon1,lat2,lon2):
     #print("Result:", distance)
     return distance
 
-
 def location_filter():
     filtered=[]
-    location_dict = getmap()
+    locations=[]
+    #location_dict=getmap()
+    file=open('locations.csv')
+    entry=csv.reader(file)
+    for element in entry:
+        locations.append([element[2],element[1]])
+    file.close()
+
     file=open('geopy_results_1526569414.4222775.csv')
     entry=csv.reader(file)
     next(entry,None)
     for row in entry:
-        for element in location_dict.values():
-                for coordinate in element:
-                    try:    
-                        if distance_calculator(coordinate[1],coordinate[0],float(row[2]),float(row[3])) < 200:
-                            filtered.append(row)
-                    except:
-                        pass
+        for element in locations:
+            try:    
+                if distance_calculator(float(element[0]),float(element[1]),float(row[2]),float(row[3])) < 200:
+                    filtered.append(row)
+            except:
+                pass
     return filtered
 
-
 def keyword_filter(filtered_locations,keywords):
-    filtered = []
+    filtered=[]
     for word in keywords:
         for row in filtered_locations:
             text= row[4].lower()
@@ -50,13 +54,16 @@ def keyword_filter(filtered_locations,keywords):
                 filtered.append([word, row[1]])
     return filtered
 
-
 def tweet_filter(keyword_list):
     filtered_locations=location_filter()
     filtered_words=keyword_filter(filtered_locations,keyword_list)
+    with open('filtered_words.csv',"w") as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerows(filtered_words)
+        f.close()
     return filtered_words
 
 if __name__ == "__main__":
-    filtered_words = tweet_filter(['futbol','camp nou','champions'])
+    filtered_words=tweet_filter(['futbol','camp nou','champions'])
     for element in filtered_words:
             print(element)
