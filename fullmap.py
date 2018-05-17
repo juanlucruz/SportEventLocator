@@ -116,7 +116,7 @@ def draw_tweets_detected(file):
 
 
 def main(args):
-    draw_fields_detected()
+    # draw_fields_detected()
     draw_tweets_detected(args[1])
 
 
