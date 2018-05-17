@@ -1,7 +1,8 @@
 from owslib.wms import WebMapService
 from owslib import crs
 from pyspark import SparkContext
-from image_proc import *
+from image_processing import *
+import csv
 
 
 c = crs.Crs('EPSG:3857')
@@ -56,5 +57,7 @@ def getmap():
 
 if __name__ == "__main__":
     xydict = getmap()
-    for element in xydict.items():
-        print(element)
+    with open(r'saved_tweets_big.csv', 'w') as out_file:
+        writer = csv.writer(out_file)
+        for element in xydict.items():
+            writer.writerow(element)

@@ -25,7 +25,7 @@ def distance_calculator(lat1,lon1,lat2,lon2):
 
 def location_filter():
     filtered=[]
-    location_dict=getmap()
+    location_dict = getmap()
     file=open('geopy_results_1526569414.4222775.csv')
     entry=csv.reader(file)
     next(entry,None)

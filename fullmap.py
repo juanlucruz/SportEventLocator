@@ -21,7 +21,7 @@ def color_palette(N):
 
 
 def location_is_near(row):
-    # location_dict = getmap()
+    location_dict = getmap()
     for element in location_dict.values():
             for coordinate in element:
                 try:
@@ -109,7 +109,7 @@ def draw_tweets_detected(file):
     colors, _ = color_palette(n_tweets)
     for i in range(len(lat[:n_tweets])):
         try:
-            print('Writing...{}'.format(i))
+            # print('Writing...{}'.format(i))
             proj = Proj(init='epsg:3857')
             xm, ym = proj(lon[i], lat[i])
             p1 = picsize / (2 * box) * (xm - (x - box))

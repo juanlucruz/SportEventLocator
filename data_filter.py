@@ -104,8 +104,6 @@ def main():
                  user_id])
 
 
-
-
     # print(unzip)
     # print(json.dumps(json_parsed[1],indent=2))
     # print(json_parsed[1]['place']['full_name'])
