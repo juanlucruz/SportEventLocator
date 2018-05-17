@@ -11,12 +11,25 @@ import matplotlib as plt
 import numpy as np
 from skimage import io
 import colorsys
+from tweet_filter import distance_calculator
 
 
 def color_palette(N):
     HSV_tuples = [(x * 1.0 / N, 0.5, 0.5) for x in range(N)]
     RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
     return list(RGB_tuples), HSV_tuples
+
+
+def location_is_near(row):
+    # location_dict = getmap()
+    for element in location_dict.values():
+            for coordinate in element:
+                try:
+                    is_near = distance_calculator(coordinate[1], coordinate[0], float(row[2]), float(row[3])) < 200
+                except:
+                    pass
+    return is_near
+
 
 def draw_fields_detected():
     c = crs.Crs('EPSG:3857')
@@ -84,8 +97,12 @@ def draw_tweets_detected(file):
         lon = []
         for row in reader:
             # print(format(row).encode())
-            lat.append(row[2])
-            lon.append(row[3])
+            if location_is_near(row):
+                lat.append(row[2])
+                lon.append(row[3])
+
+
+
     print('Csv finished')
     n_tweets = len(lat)
     alpha = 2/n_tweets

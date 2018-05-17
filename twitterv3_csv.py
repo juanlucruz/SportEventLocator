@@ -55,7 +55,7 @@ def main():
             stream.filter(locations=[2.006981,41.308702,2.33325,41.47628], async=False)##These coordinates are approximate bounding box around BCN
             #stream.filter(track=['obama'])## This will feed the stream all mentions of 'keyword' 
             break
-        except Exception, e:
+        except Exception as e:
              # Abnormal exit: Reconnect
              nsecs=random.randint(60,63)
              time.sleep(nsecs)            

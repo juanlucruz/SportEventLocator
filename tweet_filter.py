@@ -22,6 +22,7 @@ def distance_calculator(lat1,lon1,lat2,lon2):
     #print("Result:", distance)
     return distance
 
+
 def location_filter():
     filtered=[]
     location_dict=getmap()
@@ -38,8 +39,9 @@ def location_filter():
                         pass
     return filtered
 
+
 def keyword_filter(filtered_locations,keywords):
-    filtered=[]
+    filtered = []
     for word in keywords:
         for row in filtered_locations:
             text= row[4].lower()
@@ -48,12 +50,13 @@ def keyword_filter(filtered_locations,keywords):
                 filtered.append([word, row[1]])
     return filtered
 
+
 def tweet_filter(keyword_list):
     filtered_locations=location_filter()
     filtered_words=keyword_filter(filtered_locations,keyword_list)
     return filtered_words
 
 if __name__ == "__main__":
-    filtered_words=tweet_filter(['futbol','camp nou','champions'])
+    filtered_words = tweet_filter(['futbol','camp nou','champions'])
     for element in filtered_words:
             print(element)

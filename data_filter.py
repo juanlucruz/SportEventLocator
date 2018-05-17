@@ -45,7 +45,7 @@ def main():
     end_flag = False
     csvfile = open('geopy_results_{}.csv'.format(time.time()), 'w')
     csvwriter = csv.writer(csvfile)
-    head = ['UserID', 'Date', 'Lat', 'Long', 'Text', 'TweetID']
+    head = ['TweetID', 'Date', 'Lat', 'Long', 'Text', 'UserID']
     csvwriter.writerow(head)
     with open(DATA_DIR + 'saved_tweets_big.json', 'r') as fp:
     # with open(DATA_DIR + 'mini_file.json', 'r') as fp:
