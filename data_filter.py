@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # Data filtering and correlation
 
-import datetime
+import time
 import json
 # import pandas as pd
-import numpy as np
+# import numpy as np
+import csv
 
-DATA_DIR = './'
-DATA_DIR = '/home/jl/'
+# DATA_DIR = './'
+# DATA_DIR = '/home/jl/'
+DATA_DIR = '/media/osonoble/Águila Alfa/BIGDATA/'
 
 
 def read_in_chunks(file_object, chunk_size=1024):
@@ -38,11 +40,13 @@ def close_brackets(my_str,i=0):
 def main():
     acc = ''
     p = -1
-    chunk_count = 0
     tweet_count = 0
-    indent = 0
-    json_parsed = []
+    json_parsed = {}
     end_flag = False
+    csvfile = open('geopy_results_{}.csv'.format(time.time()), 'w')
+    csvwriter = csv.writer(csvfile)
+    head = ['UserID', 'Date', 'Lat', 'Long', 'Text', 'TweetID']
+    csvwriter.writerow(head)
     with open(DATA_DIR + 'saved_tweets_big.json', 'r') as fp:
     # with open(DATA_DIR + 'mini_file.json', 'r') as fp:
         json_listed = [i.split('}{') for i in fp][0]
@@ -51,7 +55,7 @@ def main():
             # print('{' + el + '}')
             unzip = '{' + el + '}'
             try:
-                json_parsed.append(json.loads(unzip))
+                json_parsed = json.loads(unzip)
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
@@ -59,7 +63,7 @@ def main():
             # print('{' + el )
             unzip = '{' + el
             try:
-                json_parsed.append(json.loads(unzip))
+                json_parsed = json.loads(unzip)
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
@@ -67,62 +71,51 @@ def main():
             # print(el + '}')
             unzip = el + '}'
             try:
-                json_parsed.append(json.loads(unzip))
+                json_parsed = json.loads(unzip)
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
-        # a = json.load(fp)
-        # for chunk in read_in_chunks(fp, 1024):
-        #     # print(chunk)
-        #     l_brackets = chunk.count('{')
-        #     r_brackets = chunk.count('}')
-        #     print('CHUNK',chunk_count)
-        #
-        #     # Parse chunk
-        #     for i in range(l_brackets+r_brackets):
-        #         print('BRACKETS',i)
-        #         if l_brackets > 0 and r_brackets > 0:
-        #             l_bracket_i = chunk[p+1:].find('{')
-        #             r_bracket_i = chunk[p+1:].find('}')
-        #             if l_bracket_i > r_bracket_i:
-        #                 p += l_bracket_i
-        #                 indent += 1
-        #                 l_brackets -= 1
-        #             else:
-        #                 p += r_bracket_i
-        #                 indent -= 1
-        #                 r_brackets -= 1
-        #                 if indent == 0:
-        #                     json_parsed = acc + chunk[:p]
-        #                     break
-        #         elif l_brackets > 0 and r_brackets == 0:
-        #             l_bracket_i = chunk[p + 1:].find('{')
-        #             p += l_bracket_i
-        #             indent += 1
-        #             l_brackets -= 1
-        #         elif l_brackets == 0 and r_brackets > 0:
-        #             r_bracket_i = chunk[p + 1:].find('}')
-        #             p += r_bracket_i
-        #             indent -= 1
-        #             r_brackets -= 1
-        #             if indent == 0:
-        #                 json_parsed = acc + chunk[:p]
-        #                 break
-        #
-        #     if json_parsed != '' and indent == 0:
-        #         break
-        #     acc += chunk
-        #     chunk_count += 1
-            #  END READING FOR
-    print(len(json_parsed))
+
+        # Filtering
+        user_id = json_parsed['user']['id']
+        tweet_id = json_parsed['id_str']
+        if json_parsed['coordinates'] is not None:
+            # print(json_parsed['coordinates'])
+            longitude = json_parsed['coordinates']['coordinates'][0]
+            latitude = json_parsed['coordinates']['coordinates'][1]
+        else:
+            bbox = json_parsed['place']['bounding_box']['coordinates'][0]
+            # print(bbox)
+            XY = [(bbox[0][0] + bbox[2][0]) / 2, (bbox[0][1] + bbox[2][1]) / 2]
+            longitude = XY[0]
+            latitude = XY[1]
+        timestamp = json_parsed['timestamp_ms']
+        if 'extended_tweet' in json_parsed.keys():
+            text = json_parsed['extended_tweet']['full_text']
+        else:
+            text = json_parsed['text']
+
+            csvwriter.writerow(
+                [tweet_id,
+                 timestamp,
+                 latitude,
+                 longitude,
+                 text,
+                 user_id])
+
+
+
+
+    # print(unzip)
     # print(json.dumps(json_parsed[1],indent=2))
     # print(json_parsed[1]['place']['full_name'])
-    for i in range(100):
-        if 'extended_tweet' in json_parsed[i].keys():
-            print(json_parsed[i]['extended_tweet']['full_text'].lower().split())
-        else:
-            print(json_parsed[i]['text'].lower().split())
+    # for i in range(2):
+    #     if 'extended_tweet' in json_parsed[i].keys():
+    #         print(json_parsed[i]['extended_tweet']['full_text'].lower().split())
+    #     else:
+    #         print(json_parsed[i]['text'].lower().split())
     # print(a)
+    # ID, timestamp, latitud, longitud, texto, USER
 
 if __name__ == "__main__":
     main()
