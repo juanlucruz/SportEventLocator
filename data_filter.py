@@ -59,6 +59,21 @@ def main():
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
+                sub_els = el.split('}\n{')
+                try:
+                    for sub_el in sub_els:
+                        if sub_el[0] != '{' and sub_el[-1] != '}':
+                            unzip = '{' + sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] != '{' and sub_el[-1] == '}':
+                            unzip = '{' + sub_el
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] == '{' and sub_el[-1] != '}':
+                            unzip = sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                except json.decoder.JSONDecodeError as e:
+                    # print('Error decoding {}'.format(unzip))
+                    print('Error decoding')
         elif el[0] != '{' and el[-1] == '}':
             # print('{' + el )
             unzip = '{' + el
@@ -67,6 +82,21 @@ def main():
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
+                sub_els = el.split('}\n{')
+                try:
+                    for sub_el in sub_els:
+                        if sub_el[0] != '{' and sub_el[-1] != '}':
+                            unzip = '{' + sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] != '{' and sub_el[-1] == '}':
+                            unzip = '{' + sub_el
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] == '{' and sub_el[-1] != '}':
+                            unzip = sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                except json.decoder.JSONDecodeError as e:
+                    # print('Error decoding {}'.format(unzip))
+                    print('Error decoding')
         elif el[0] == '{' and el[-1] != '}':
             # print(el + '}')
             unzip = el + '}'
@@ -75,6 +105,21 @@ def main():
             except json.decoder.JSONDecodeError as e:
                 # print('Error decoding {}'.format(unzip))
                 print('Error decoding')
+                sub_els = el.split('}\n{')
+                try:
+                    for sub_el in sub_els:
+                        if sub_el[0] != '{' and sub_el[-1] != '}':
+                            unzip = '{' + sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] != '{' and sub_el[-1] == '}':
+                            unzip = '{' + sub_el
+                            json_parsed = json.loads(unzip)
+                        elif sub_el[0] == '{' and sub_el[-1] != '}':
+                            unzip = sub_el + '}'
+                            json_parsed = json.loads(unzip)
+                except json.decoder.JSONDecodeError as e:
+                    # print('Error decoding {}'.format(unzip))
+                    print('Error decoding')
 
         # Filtering
         user_id = json_parsed['user']['id']
@@ -91,16 +136,23 @@ def main():
             latitude = XY[1]
         timestamp = json_parsed['timestamp_ms']
         if 'extended_tweet' in json_parsed.keys():
-            text = json_parsed['extended_tweet']['full_text']
+            text = json_parsed['extended_tweet']['full_text'].lower()
         else:
-            text = json_parsed['text']
+            text = json_parsed['text'].lower()
 
             csvwriter.writerow(
                 [tweet_id,
                  timestamp,
                  latitude,
                  longitude,
-                 text,
+                 ''.join(
+                     list(
+                         filter(
+                             lambda ch: ch not in "?.!/;:,",
+                             ''.join(text.split('\n'))
+                         )
+                     )
+                 ),
                  user_id])
 
 

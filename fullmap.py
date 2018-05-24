@@ -20,14 +20,13 @@ def color_palette(N):
     return list(RGB_tuples), HSV_tuples
 
 
-def location_is_near(row):
-    location_dict = getmap()
-    for element in location_dict.values():
-            for coordinate in element:
-                try:
-                    is_near = distance_calculator(coordinate[1], coordinate[0], float(row[2]), float(row[3])) < 200
-                except:
-                    pass
+def location_is_near(row, location_list):
+    # location_dict = getmap()
+    for coordinate in location_list:
+        try:
+            is_near = distance_calculator(coordinate[1], coordinate[0], float(row[2]), float(row[3])) < 200
+        except:
+            raise Exception('Problem')
     return is_near
 
 
@@ -91,15 +90,20 @@ def draw_tweets_detected(file):
     tweets = img1.copy()
     final = img_fields.copy()
     with open(file, 'r') as csv_file:
-        reader = csv.reader(csv_file,)
-        reader.__next__()
-        lat = []
-        lon = []
-        for row in reader:
-            # print(format(row).encode())
-            if location_is_near(row):
-                lat.append(row[2])
-                lon.append(row[3])
+        with open('locations.csv', 'r') as csv_locations:
+            loc_reader = csv.reader(csv_locations)
+            location_list = list(loc_reader)
+            print(location_list)
+            reader = csv.reader(csv_file,)
+            reader.__next__()
+            lat = []
+            lon = []
+
+            for row in reader:
+                # print(format(row).encode())
+                if location_is_near(row, location_list):
+                    lat.append(row[2])
+                    lon.append(row[3])
 
 
 
