@@ -90,6 +90,7 @@ def tweet_filter(location_dataframe, keyword_list):
     return counted_words_df
 
 
+"""
 def occurrence_count(filtered_words, stopwords):
     occurrence_list = []
     #Remove duplicates
@@ -142,6 +143,36 @@ def occurrence_count(filtered_words, stopwords):
         f.close()
 
     return occurrence_list, occurrence_hours
+"""
+
+def occurrence_count():
+
+    #Remove duplicates
+    final_count_df = pd.read_csv('final_count.csv')
+    final_count_df=final_count_df.drop_duplicates(subset=['tweetID'], keep="first")
+    final_count_df.to_csv('final_count2.csv',index=False)    
+
+    # Turn date into proper format
+    f2=open('final_count_occurrence.csv',"w")
+    with open('final_count2.csv',"r+") as f:
+        final_count_csv = csv.reader(f)
+        writer = csv.writer(f2, lineterminator='\n')
+        for index,row in enumerate(final_count_csv):
+            if index==0:
+                writer.writerow(row)
+            else:
+                row[2] = datetime.fromtimestamp(float(row[2])/1000.0)
+                writer.writerow(row)
+    f.close()
+    f2.close()
+
+    # Group by data range
+    final_count_df = pd.read_csv('final_count_occurrence.csv',usecols=lambda col: col not in ["Unnamed: 0", "tweetID", "lat", "lon", "userID"])
+    final_count_df.index = pd.DatetimeIndex(final_count_df['date'])
+    dfrs = final_count_df.resample('60min', how=sum)        
+    print(dfrs)
+    dfrs.to_csv('occurrences.csv',index=True)  
+
 
 
 def main():
@@ -159,9 +190,9 @@ def main():
     field_id = 0
     field_locations = pd.read_csv('locations.csv')
     # print(field_locations.head())
-    tweet_df = pd.read_csv('final_results_clean_short.csv', dtype=str)
+    tweet_df = pd.read_csv('final_results_clean.csv', dtype=str)
     # print(tweet_df.head())
-    del field_locations['ID']
+    del field_locations[0]
     loc_full_df = None
     filtered_words_list = []
     for index, row in field_locations.iterrows():
@@ -186,8 +217,10 @@ def main():
     loc_full_df.sort_values(by=['date']).reset_index(drop=True).to_csv('final_count.csv')
     # occurrence_list, occurrence_hours = occurrence_count(filtered_words, keywords)
 
+
 if __name__ == "__main__":
-    main()
+    #main()
+    occurrence_count()
     """
     for element in filtered_words:
             print(element)
