@@ -7,6 +7,9 @@ from itertools import groupby
 from collections import OrderedDict
 import pandas as pd
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import seaborn.apionly as sns
 
 
 # global keywords
@@ -145,53 +148,97 @@ def occurrence_count(filtered_words, stopwords):
     return occurrence_list, occurrence_hours
 """
 
-def occurrence_count():
+def occurrence_count(keywords):
 
     #Remove duplicates
     final_count_df = pd.read_csv('final_count.csv')
-    final_count_df=final_count_df.drop_duplicates(subset=['tweetID'], keep="first")
-    final_count_df.to_csv('final_count2.csv',index=False)    
+    final_count_df.drop_duplicates(subset=['tweetID'], keep='first')
+    del final_count_df['i']
+    ocurrences_df = final_count_df.copy()
 
+    # final_count_df.to_csv('final_count2.csv', index=False)
+    for index, row in ocurrences_df.iterrows():
+        ocurrences_df.loc[index, "date"] = datetime.fromtimestamp(float(row['date'])/1000.0)
     # Turn date into proper format
-    f2=open('final_count_occurrence.csv',"w")
-    with open('final_count2.csv',"r+") as f:
-        final_count_csv = csv.reader(f)
-        writer = csv.writer(f2, lineterminator='\n')
-        for index,row in enumerate(final_count_csv):
-            if index==0:
-                writer.writerow(row)
-            else:
-                row[2] = datetime.fromtimestamp(float(row[2])/1000.0)
-                writer.writerow(row)
-    f.close()
-    f2.close()
+    # with open('final_count_occurrence.csv',"w") as f2:
+    #     with open('final_count2.csv',"r+") as f:
+    #         final_count_csv = csv.reader(f)
+    #         writer = csv.writer(f2, lineterminator='\n')
+    #         for index,row in enumerate(final_count_csv):
+    #             if index == 0:
+    #                 writer.writerow(row)
+    #             else:
+    #                 row[2] = datetime.fromtimestamp(float(row[2])/1000.0)
+    #                 writer.writerow([0] + row)
 
     # Group by data range
-    final_count_df = pd.read_csv('final_count_occurrence.csv',usecols=lambda col: col not in ["Unnamed: 0", "tweetID", "lat", "lon", "userID"])
-    final_count_df.index = pd.DatetimeIndex(final_count_df['date'])
-    dfrs = final_count_df.resample('60min', how=sum)        
-    print(dfrs)
-    dfrs.to_csv('occurrences.csv',index=True)  
+    # final_count_df = pd.read_csv('final_count_occurrence.csv', usecols=lambda col: col not in ["Unnamed: 0", "tweetID", "lat", "lon", "userID"])
+    # final_count_df = pd.read_csv('final_count_occurrence.csv')
+    # timedf = pd.date_range("00:00", "23:30", freq="30min")
+
+    del ocurrences_df['tweetID']
+    del ocurrences_df['lat']
+    del ocurrences_df['lon']
+    del ocurrences_df['userID']
+    ocurrences_df.index = pd.DatetimeIndex(ocurrences_df['date'].values)
+    dfrs = ocurrences_df.resample('30min').apply(sum)
+    dfrs.fillna(0, inplace=True)
+    print(dfrs.head())
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # x = list(dfrs.index.values)
+    # y = list(dfrs.columns.values)
+    # z = dfrs.values
+    weeks = [g for n, g in dfrs.groupby(pd.TimeGrouper('W'))]
+    # pd.DataFrame.index.
+    # plt.figure()
+
+    print(len(weeks))
+
+    for week in weeks:
+
+        print(week.std())
+        high_var_df = week.loc[:, week.std() > .1]
+        plt.figure()
+        for name, series in high_var_df.iteritems():
+            plt.plot(series, high_var_df.index)
+        plt.figure()
+        ax1 = sns.heatmap(high_var_df)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=90)
+        plt.tight_layout()
+        plt.figure()
+        ax2 = sns.heatmap(high_var_df.corr())
+        plt.setp(ax2.xaxis.get_majorticklabels(), rotation=90)
+        plt.tight_layout()
+        # print(x, y, z)
+        # input('ENTER')
+
+    plt.pause(0.001)
+    input('ENTER')
+    plt.close()
+    dfrs.to_csv('occurrences.csv',index=True)
+    high_var_df.to_csv('high_var_df.csv',index=True)
 
 
-
-def main():
-    keywords = {
-        'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
-        'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
-        'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
-        'futbol','estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
-        'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
-        'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
-        'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
-        'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
-        'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
-    }
+def main(keywords):
+    # keywords = {
+    #     'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
+    #     'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
+    #     'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
+    #     'futbol','estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
+    #     'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
+    #     'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
+    #     'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
+    #     'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
+    #     'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
+    # }
     field_id = 0
     field_locations = pd.read_csv('locations.csv')
     # print(field_locations.head())
+    # tweet_df = pd.read_csv('final_results_clean_short.csv', dtype=str)
     tweet_df = pd.read_csv('final_results_clean.csv', dtype=str)
     # print(tweet_df.head())
+    # del field_locations['ID']
     del field_locations[0]
     loc_full_df = None
     filtered_words_list = []
@@ -219,8 +266,19 @@ def main():
 
 
 if __name__ == "__main__":
-    #main()
-    occurrence_count()
+    keywords = {
+        'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
+        'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
+        'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
+        'futbol', 'estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
+        'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
+        'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
+        'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
+        'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
+        'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
+    }
+    #main(keywords)
+    occurrence_count(keywords)
     """
     for element in filtered_words:
             print(element)
