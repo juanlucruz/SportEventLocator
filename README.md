@@ -44,6 +44,15 @@ All the functions related to image processing are in the image_processing.py scr
 
 The fullmap.py has functions that allow to represent the processed locations in a Barcelona map.
 
+## Tweet collection
+
+The twitter_scrapper.py script contains functions to collect tweets in a specific location. The search result is saved in a csv. In order to execute this script you must obtain the credentials "CONSUMER_KEY","CONSUMER_SECRET","ACCESS_TOKEN" and "ACCESS_SECRET'" on the official twitter page.
+
+
 ## Tweet filtering
 
 The tweet_filter.py script contains functions that allow to filter the tweets gathered in a csv file. It filters them by location proximity to the detected football fields. Then, a key word filtering is applied to get tweets with certain words that could have valuable information regarding football events. Finally, the occurrence of each key word in a certain range of time (e.g 30 minutes) is calculated and stored as useful data to implement the football match predictive model.
+
+
+
+
