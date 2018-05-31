@@ -10,11 +10,8 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import seaborn.apionly as sns
-
-
-# global keywords
-# stopwords = ['futbol','camp nou','champions','clasico','derbi','cornella','barça','espanyol']
-
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
 def distance_calculator(lat1,lon1,lat2,lon2):
     # approximate radius of earth in km
@@ -76,77 +73,20 @@ def tweet_filter(location_dataframe, keyword_list):
         counted_words_df[keyword] = pd.Series([0]*sLength, index=counted_words_df.index)
         for index, row in counted_words_df.iterrows():
             # print(row['text'].split())
-            if keyword in row['text'].split():
+            if keyword in row['text'].split() or '#' + keyword in row['text'].split():
                 # print('HIT {}'.format(keyword))
                 counted_words_df.at[index, keyword] = 1
     del counted_words_df['text']
-
-    #         for row in :
-    #             text = row[4]
-    #             text = unidecode.unidecode(text)
-    #             if word in text:
-    #                 filtered.append([word, row[1]])
-    # with open('filtered_words.csv', "w") as f:
-    #     writer = csv.writer(f, lineterminator='\n')
-    #     writer.writerows(filtered_words)
-    #     f.close()
     return counted_words_df
 
+def match_simple(row):
+    if row['barcelona'] > 5:
+        row['match'] = True
 
-"""
-def occurrence_count(filtered_words, stopwords):
-    occurrence_list = []
-    #Remove duplicates
-    unique = []
-    for item in filtered_words:
-        if item not in unique:
-            unique.append(item)
-    filtered_words = unique
+def match_double(row, rival):
+    if row['barcelona'] > 2 and row[rival] > 2:
+        row['match'] = True
 
-    for stopword in stopwords:
-        occurrence_list.append([stopword, 0])
-
-    for word in filtered_words:
-        # word[1]=datetime.fromtimestamp(float(word[1])/1000.0).strftime('%Y-%m-%d %H:%M:%S')
-        word[1] = datetime.fromtimestamp(float(word[1])/1000.0)
-        for i, stopword in enumerate(stopwords):
-            if word[0] == stopword:
-                occurrence_list[i][1] += 1
-    
-    # with open('filtered_words.csv',"w") as f:
-    #     writer = csv.writer(f, lineterminator='\n')
-    #     writer.writerows(filtered_words)
-    #     f.close()
-
-    occurrence_hours = []
-    for stopword in stopwords:
-        occurrence_hours.append([])
-
-    for i, stopword in enumerate(stopwords):
-        for word in filtered_words:
-            if word[0] == stopword:
-                occurrence_hours[i].append(word[1])
-
-    count = 0
-    row = []
-    with open('occurrences.csv',"w") as f:
-        writer = csv.writer(f, lineterminator='\n')
-        for i, element in enumerate(occurrence_hours):
-            g = groupby(sorted(element), key=get_key)
-            # print data
-            for key, items in g:
-                #print(key)
-                for item in items:
-                    #print('-', item)
-                    count+=1
-                row = [stopwords[i], key, count]
-                writer.writerow(row)
-                count = 0
-                row=[]
-        f.close()
-
-    return occurrence_list, occurrence_hours
-"""
 
 def occurrence_count(keywords):
 
@@ -159,22 +99,6 @@ def occurrence_count(keywords):
     # final_count_df.to_csv('final_count2.csv', index=False)
     for index, row in ocurrences_df.iterrows():
         ocurrences_df.loc[index, "date"] = datetime.fromtimestamp(float(row['date'])/1000.0)
-    # Turn date into proper format
-    # with open('final_count_occurrence.csv',"w") as f2:
-    #     with open('final_count2.csv',"r+") as f:
-    #         final_count_csv = csv.reader(f)
-    #         writer = csv.writer(f2, lineterminator='\n')
-    #         for index,row in enumerate(final_count_csv):
-    #             if index == 0:
-    #                 writer.writerow(row)
-    #             else:
-    #                 row[2] = datetime.fromtimestamp(float(row[2])/1000.0)
-    #                 writer.writerow([0] + row)
-
-    # Group by data range
-    # final_count_df = pd.read_csv('final_count_occurrence.csv', usecols=lambda col: col not in ["Unnamed: 0", "tweetID", "lat", "lon", "userID"])
-    # final_count_df = pd.read_csv('final_count_occurrence.csv')
-    # timedf = pd.date_range("00:00", "23:30", freq="30min")
 
     del ocurrences_df['tweetID']
     del ocurrences_df['lat']
@@ -193,12 +117,33 @@ def occurrence_count(keywords):
     # pd.DataFrame.index.
     # plt.figure()
 
-    print(len(weeks))
+    # print(len(weeks))
+    w = 0
+    for week_data in weeks:
+        # print(week_data.std())
+        high_var_df = week_data.loc[:, week_data.std() > .1]
+        high_var_df['match'] = 0
+        # print(high_var_df.head())
+        if w == 0:
+            # for index, row in high_var_df.iterrows():
+                # row['match'] = False
+            pass
+        elif w == 1:
+            high_var_df[329:334]['match'] = 1
+            # for index, row in high_var_df.iterrows():
+            #     row['match'] = 1 if row['madrid'] > 2 and row['barcelona'] > 2 else 0
+                # row['match'] = 1 if row['barcelona'] > 5 else 0
+                #331->335
 
-    for week in weeks:
-
-        print(week.std())
-        high_var_df = week.loc[:, week.std() > .1]
+                # high_var_df.loc[index] = row
+        elif w == 2:
+            high_var_df[136:140]['match'] = 1
+            # for index, row in high_var_df.iterrows():
+            #     row['match'] = 1 if row['barcelona'] > 2 and row['villarreal'] > 2 else 0
+            #     # row['match'] = 1 if row['barcelona'] > 5 else 0
+            #     #138->141
+            #     high_var_df.loc[index] = row
+        high_var_df.to_csv(str(high_var_df.index[0]) + '.csv')
         plt.figure()
         for name, series in high_var_df.iteritems():
             plt.plot(series, high_var_df.index)
@@ -212,35 +157,63 @@ def occurrence_count(keywords):
         plt.tight_layout()
         # print(x, y, z)
         # input('ENTER')
+        model_train(high_var_df, w,  'linear_regression')
+        w += 1
 
     plt.pause(0.001)
     input('ENTER')
     plt.close()
     dfrs.to_csv('occurrences.csv',index=True)
-    high_var_df.to_csv('high_var_df.csv',index=True)
+    # high_var_df.to_csv('high_var_df.csv',index=True)
 
 
-def main(keywords):
-    # keywords = {
-    #     'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
-    #     'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
-    #     'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
-    #     'futbol','estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
-    #     'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
-    #     'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
-    #     'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
-    #     'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
-    #     'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
-    # }
+def model_train(data, w,  ml_type=None,):
+    # data = data.drop('date', axis=1)
+    # train_pr = ['barcelona', 'madrid', 'real', 'barça']
+    # prdata = data[train_pr]
+    data['is_train'] = np.random.uniform(0, 1, len(data)) <= .75
+    train, test = data[data['is_train'] == True], data[data['is_train'] == False]
+    # print('Number of observations in the training data:', len(train))
+    # print('Number of observations in the test data:', len(test))
+    # print(train.head())
+    # features = data.columns.values[:-2]
+    np.random.seed(0)
+    if ml_type == 'linear_regression':
+        # Linear Regression
+        target = train.match
+        train_pr = train.columns.values[:-2]
+
+        predictor = LinearRegression(n_jobs=-1)
+        predictor.fit(train[train_pr], target)
+
+        print('features: {}'.format(train_pr))
+        print('coefficients: {}'.format(predictor.coef_))
+        test[train_pr].convert_objects(convert_numeric=True)
+        outcome = predictor.predict(X=test[train_pr].values)
+
+        for i in range(len(outcome)):
+            if outcome[i]>0:
+                print('{}.\tOUTCOME: {} -> match: {}'.format(i, outcome[i], test['match'][i]))
+    elif ml_type=='random_forest':
+        # train_x, test_x, train_y, test_y = train_test_split(data, 0.7)
+
+        print(features)
+        # faltan labels
+    elif ml_type == 'knearest':
+        indices = np.random.permutation(len(data))
+    else:
+        pass
+
+
+def sparser(keywords):
     field_id = 0
     field_locations = pd.read_csv('locations.csv')
     # print(field_locations.head())
     # tweet_df = pd.read_csv('final_results_clean_short.csv', dtype=str)
     tweet_df = pd.read_csv('final_results_clean.csv', dtype=str)
     # print(tweet_df.head())
-    # del field_locations['ID']
-    del field_locations[0]
-    loc_full_df = None
+    del field_locations['ID']
+    # del field_locations[0]
     filtered_words_list = []
     for index, row in field_locations.iterrows():
         loc_filtered_df = location_filter(tweet_df, row['lon'], row['lat'])
@@ -248,45 +221,26 @@ def main(keywords):
             # print(loc_filtered_df.head())
             filtered_words_list.append(tweet_filter(loc_filtered_df, keywords))
             # print(filtered_words)
-            print(len(filtered_words_list))
-    # for el in filtered_words_list:
-    #     print(el['barcelona'])
+        print('{}/{}'.format(index+1,len(field_locations.index)))
     loc_full_df = pd.concat(filtered_words_list, ignore_index=True)
-            # if loc_full_df is None:
-            #     loc_full_df = filtered_words.copy()
-            #     print(loc_full_df.head())
-            # else:
-            #     print('BEFORE:{}'.format(loc_full_df.head()))
-            #     print('words:{}'.format(filtered_words.head()))
-            #     loc_full_df.append(filtered_words)
-            #     print('AFTER:{}'.format(loc_full_df.head()))
-            # input('WAIT')
     loc_full_df.sort_values(by=['date']).reset_index(drop=True).to_csv('final_count.csv')
     # occurrence_list, occurrence_hours = occurrence_count(filtered_words, keywords)
 
 
 if __name__ == "__main__":
-    keywords = {
-        'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
-        'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
-        'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
-        'futbol', 'estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
-        'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
-        'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
-        'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
-        'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
-        'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
-    }
-    #main(keywords)
+    # keywords = {
+    #     'tarragona', 'pase', 'tiro', 'español', 'espanyol', 'barsa', 'madrid', 'sevilla', 'zaragoza', 'lorca',
+    #     'almeria', 'empieza', 'lugo', 'vigo', 'agrupacion', 'soria', 'futbol', 'jugadores', 'cadiz', 'gol', 'roja',
+    #     'gimnastic', 'corner', 'alcorcon', 'campeones', 'balompie', 'levante', 'falta', 'partido', 'centro', 'union',
+    #     'futbol', 'estadi', 'gijon', 'targeta', 'pelota', 'barça', 'deportiu', 'huesca', 'saque', 'cultural', 'yellow',
+    #     'betis', 'rayo', 'albacete', 'alaves', 'leonesa', 'valladolid', 'liga', 'goles', 'clasico', 'estadio', 'club',
+    #     'sociedad', 'deportivo', 'final', 'entrada', 'eibar', 'palmas', 'celta', 'vermella', 'barcelona', 'numancia',
+    #     'cordoba', 'reus', 'valencia', 'campeon', 'coruña', 'vallecano', 'malaga', 'faltas', 'granada', 'athletic',
+    #     'osasuna', 'amarilla', 'getafe', 'penalty', 'tenerife', 'villarreal', 'atleti', 'atletico', 'deportiva',
+    #     'tarjeta', 'sporting', 'balompie', 'arbitro', 'leganes', 'oviedo', 'red', 'girona', 'groga', 'real'
+    # }
+    keywords = {'espanyol', 'liga', 'campeones', 'rcde', 'español', 'camp', 'nou', 'barcelona', 'estadi', 'estadio',
+                'club', 'futbol', 'partido', 'madrid', 'liga', 'clasico', 'goles', 'gol', 'barça', 'final',
+                'real', 'villarreal', 'targeta', 'campeon'}
+    # sparser(keywords)
     occurrence_count(keywords)
-    """
-    for element in filtered_words:
-            print(element)
-    """
-    """
-    for element in occurrence_list:
-        print(element)
-
-    for element in occurrence_hours:
-        print(element)
-    """

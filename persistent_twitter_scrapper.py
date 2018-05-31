@@ -70,6 +70,7 @@ class MyStreamer(TwythonStreamer):
         with open('saved_tweets_big.json', 'a') as out_file:
             json.dump(tweet, out_file)
 
+
 def main():
 
     # Load credentials from json file
